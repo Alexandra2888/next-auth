@@ -18,8 +18,15 @@ import { LoginSchema } from "@/schemas";
 import { Button } from "../ui/button";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
+import { login } from "@/actions/login";
+import { use, useState, useTransition } from "react";
 
 export const LoginForm = () => {
+const [isPending, startTransition] = useTransition();
+const [error, setError] = useState<string | undefined>("");
+const [success, setSuccess] = useState<string | undefined>("");
+
+
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -29,9 +36,18 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-  console.log(values);
+    setError("");
+    setSuccess("");
+
+    startTransition(() => {
+    login(values)
+    .then((data) => {
+      setError(data. error);
+      setSuccess(data.success);
+    })
+  })
   };
-  
+
   return (
     <CardWrapper
       headerLabel="Welcome back"
@@ -53,6 +69,7 @@ export const LoginForm = () => {
                       {...field}
                       placeholder="johndoe@example.com"
                       type="email"
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -66,15 +83,19 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="******" type="password" />
+                    <Input {...field} 
+                    placeholder="******" 
+                    type="password" 
+                    disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <FormError message=""/>
-          <FormSuccess message="" />
+          <FormError message={error} />
+          <FormSuccess message={success} />
           <Button type="submit" className="w-full">
             Login
           </Button>
