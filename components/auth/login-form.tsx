@@ -22,8 +22,8 @@ import { useState, useTransition } from "react";
 
 export const LoginForm = () => {
 const [isPending, startTransition] = useTransition();
-const [error, setError] = useState<string | undefined>("");
-const [success, setSuccess] = useState<string | undefined>("");
+const [error, setError] = useState<string | any>("");
+const [success, setSuccess] = useState<string | any>("");
 
 
   const form = useForm<z.infer<typeof LoginSchema>>({
