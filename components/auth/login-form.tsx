@@ -19,12 +19,16 @@ import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 
 export const LoginForm = () => {
-const [isPending, startTransition] = useTransition();
-const [error, setError] = useState<string | any>("");
-const [success, setSuccess] = useState<string | any>("");
 
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? " Email already in use with different provider!" : "";
+
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | any>("");
+  const [success, setSuccess] = useState<string | any>("");
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -39,12 +43,11 @@ const [success, setSuccess] = useState<string | any>("");
     setSuccess("");
 
     startTransition(() => {
-    login(values)
-    .then((data) => {
-      setError(data. error);
-      setSuccess(data.success);
-    })
-  })
+      login(values).then((data) => {
+        setError(data?.error);
+        // setSuccess(data?.success);
+      });
+    });
   };
 
   return (
@@ -82,10 +85,11 @@ const [success, setSuccess] = useState<string | any>("");
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} 
-                    placeholder="******" 
-                    type="password" 
-                    disabled={isPending}
+                    <Input
+                      {...field}
+                      placeholder="******"
+                      type="password"
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -93,7 +97,7 @@ const [success, setSuccess] = useState<string | any>("");
               )}
             />
           </div>
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button type="submit" className="w-full">
             Login
