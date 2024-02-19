@@ -22,15 +22,17 @@ import { useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-
 export const LoginForm = () => {
-
   const searchParams = useSearchParams();
-  const urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? " Email already in use with different provider!" : "";
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? " Email already in use with different provider!"
+      : "";
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | any>("");
   const [success, setSuccess] = useState<string | any>("");
+  const [showTwoFactor, setShowTwofactor] = useState(false);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -46,9 +48,19 @@ export const LoginForm = () => {
 
     startTransition(() => {
       login(values).then((data) => {
-        setError(data?.error);
-        setSuccess(data?.success);
-      });
+        if (data?.error) {
+          form.reset();
+          setError(data.error);
+        }
+        if(data?.success) {
+          form.reset();
+          setSuccess(data.success);
+        }
+        if(data?.twoFactor) {
+          setShowTwofactor(true);
+        }
+      })
+      .catch (() => setError("Something went wrong!"));
     });
   };
 
@@ -62,6 +74,8 @@ export const LoginForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
+            {!showTwoFactor &&
+              <>
             <FormField
               control={form.control}
               name="email"
@@ -80,6 +94,7 @@ export const LoginForm = () => {
                 </FormItem>
               )}
             />
+           
             <FormField
               control={form.control}
               name="password"
@@ -94,26 +109,45 @@ export const LoginForm = () => {
                       disabled={isPending}
                     />
                   </FormControl>
-                  <Button 
-                  size="sm"
-                  variant="link"
-                  asChild
-                  className="px-0 font-normal"
+                  <Button
+                    size="sm"
+                    variant="link"
+                    asChild
+                    className="px-0 font-normal"
                   >
-                    <Link 
-                    href="/auth/reset">
-                      Forgot password?
-                    </Link>
+                    <Link href="/auth/reset">Forgot password?</Link>
                   </Button>
                   <FormMessage />
                 </FormItem>
               )}
             />
+             </>
+              }
+              {showTwoFactor &&
+                  <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Two factor code</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="123456"
+                          disabled={isPending}
+                        
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              }
           </div>
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button type="submit" className="w-full">
-            Login
+            {showTwoFactor ? "Confirm" : "Login"}
           </Button>
         </form>
       </Form>

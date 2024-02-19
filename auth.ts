@@ -5,6 +5,7 @@ import { db } from "./lib/db";
 import { getUserById } from "./data/user";
 import { UserRole } from "@prisma/client";
 import { tree } from "next/dist/build/templates/app-page";
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation";
 
 
 
@@ -35,6 +36,16 @@ export const {
             if(account?.provider !== "credentials") return true;
                 const existingUser = await getUserById(user.id);
                 if(!existingUser?.emailVerified) return false;
+                if(existingUser.isTwoFactorEnabled) {
+                    const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
+                    if (!twoFactorConfirmation) return false;
+
+                    await db.twoFactorConfirmation.delete({
+                        where: {
+                            id: twoFactorConfirmation.id
+                        }
+                    });
+                }
             return true;
         },
         async session({token, session}) {
