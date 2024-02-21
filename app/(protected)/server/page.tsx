@@ -1,10 +1,11 @@
-import { auth } from "@/auth";
+import { UserInfo } from "@/components/user-info";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const ServerPage = async () => {
-    const session = await auth();
+    const user = await useCurrentUser();
     return (
         <div>
-            {JSON.stringify(session?.user)}
+            <UserInfo label="Server component" user={user}/>
         </div>
     )
 };
