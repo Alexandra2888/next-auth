@@ -1,14 +1,17 @@
-import { Card, CardHeader, CardFooter } from "../ui/card";
-import { BackButton } from "./back-buton";
-import { Header } from "./header";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+
+import { CardWrapper } from "@/components/auth/card-wrapper";
 
 export const ErrorCard = () => {
-  return <Card className="w-[400px] shadw-md">
-    <CardHeader>
-        <Header label="Ooops! something went wrong!"/>
-    </CardHeader>
-    <CardFooter>
-        <BackButton href="/auth/login" label="Back to login"/>
-    </CardFooter>
-  </Card>;
+  return (
+    <CardWrapper
+      headerLabel="Oops! Something went wrong!"
+      backButtonHref="/auth/login"
+      backButtonLabel="Back to login"
+    >
+      <div className="w-full flex justify-center items-center">
+      <ExclamationTriangleIcon className="text-destructive" />
+      </div>
+    </CardWrapper>
+  );
 };

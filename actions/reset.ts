@@ -1,28 +1,32 @@
 "use server";
+
 import * as z from "zod";
-import { getUserByEmail } from "@/data/user";
+
 import { ResetSchema } from "@/schemas";
-import { generatePasswordResetToken } from "@/lib/tokens";
+import { getUserByEmail } from "@/data/user";
 import { sendPasswordResetEmail } from "@/lib/mail";
+import { generatePasswordResetToken } from "@/lib/tokens";
 
 export const reset = async (values: z.infer<typeof ResetSchema>) => {
-    const validateFields = ResetSchema.safeParse(values);
+  const validatedFields = ResetSchema.safeParse(values);
 
-    if(!validateFields.success) {
-        return {error: "Invalid email!"}
-    }
+  if (!validatedFields.success) {
+    return { error: "Invalid emaiL!" };
+  }
 
-    const {email} = validateFields.data;
-    const existingUser = await getUserByEmail(email);
+  const { email } = validatedFields.data;
 
-    if(!existingUser) {
-        return {error: "Email not found!"}
-    }
+  const existingUser = await getUserByEmail(email);
 
-    const passwordResetToken = await generatePasswordResetToken(email); 
-    await sendPasswordResetEmail(
-        passwordResetToken.email,
-        passwordResetToken.token
-    );
-    return {success: "Reset email sent!"}
+  if (!existingUser) {
+    return { error: "Email not found!" };
+  }
+
+  const passwordResetToken = await generatePasswordResetToken(email);
+  await sendPasswordResetEmail(
+    passwordResetToken.email,
+    passwordResetToken.token,
+  );
+
+  return { success: "Reset email sent!" };
 }

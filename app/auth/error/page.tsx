@@ -1,9 +1,9 @@
-import {ErrorCard} from "@/components/auth/error-card";
+import { ErrorCard } from "@/components/auth/error-card";
 
-const AuthErrorpage = () => {
-  return (
-    <ErrorCard/>
-  )
-}
-
-export default AuthErrorpage;
+const AuthErrorPage = () => {
+  return ( 
+    <ErrorCard />
+  );
+};
+ 
+export default AuthErrorPage;
